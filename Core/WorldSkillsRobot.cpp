@@ -5,7 +5,7 @@
 #include <curl/curl.h>
 #include "json.hpp"
 #include <vector>
-//json.hpp взят из https://github.com/nlohmann/json/blob/31a6c0910e5676130b0f5df11b743700b70fb8ec/doc/examples/basic_json__value.cpp
+//json.hpp взят из https://github.com/nlohmann/json
 //для компиляции просто перетащить json.hpp в папку с проектом
 #include <memory>
 #include <string>
