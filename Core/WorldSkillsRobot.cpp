@@ -5,31 +5,31 @@
 #include <curl/curl.h>
 #include "json.hpp"
 #include <vector>
-//json.hpp взят из https://github.com/nlohmann/json/blob/31a6c0910e5676130b0f5df11b743700b70fb8ec/doc/examples/basic_json__value.cpp
-//для компиляции просто перетащить json.hpp в папку с проектом
+//json.hpp РІР·СЏС‚ РёР· https://github.com/nlohmann/json/blob/31a6c0910e5676130b0f5df11b743700b70fb8ec/doc/examples/basic_json__value.cpp
+//РґР»СЏ РєРѕРјРїРёР»СЏС†РёРё РїСЂРѕСЃС‚Рѕ РїРµСЂРµС‚Р°С‰РёС‚СЊ json.hpp РІ РїР°РїРєСѓ СЃ РїСЂРѕРµРєС‚РѕРј
 #include <memory>
 #include <string>
-//компиляция: g++ -std=c++11 robot_wsg.cpp -lmraa -lcurl -o a.out
+//РєРѕРјРїРёР»СЏС†РёСЏ: g++ -std=c++11 robot_wsg.cpp -lmraa -lcurl -o a.out
 
-// Моторы подключаются к клеммам M1+, M1-, M2+, M2-
-// Если полюса моторов окажутся перепутаны при подключении,
-// можно изменить соответствующие константы CON_MOTOR с 0 на 1
+// РњРѕС‚РѕСЂС‹ РїРѕРґРєР»СЋС‡Р°СЋС‚СЃСЏ Рє РєР»РµРјРјР°Рј M1+, M1-, M2+, M2-
+// Р•СЃР»Рё РїРѕР»СЋСЃР° РјРѕС‚РѕСЂРѕРІ РѕРєР°Р¶СѓС‚СЃСЏ РїРµСЂРµРїСѓС‚Р°РЅС‹ РїСЂРё РїРѕРґРєР»СЋС‡РµРЅРёРё,
+// РјРѕР¶РЅРѕ РёР·РјРµРЅРёС‚СЊ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёРµ РєРѕРЅСЃС‚Р°РЅС‚С‹ CON_MOTOR СЃ 0 РЅР° 1
 #define CON_MOTOR1 1
 #define CON_MOTOR2 0
 
-// Motor shield использует четыре контакта 4, 5, 6, 7 для управления моторами
-// 4 и 7 — для направления, 5 и 6 — для скорости
+// Motor shield РёСЃРїРѕР»СЊР·СѓРµС‚ С‡РµС‚С‹СЂРµ РєРѕРЅС‚Р°РєС‚Р° 4, 5, 6, 7 РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ РјРѕС‚РѕСЂР°РјРё
+// 4 Рё 7 вЂ” РґР»СЏ РЅР°РїСЂР°РІР»РµРЅРёСЏ, 5 Рё 6 вЂ” РґР»СЏ СЃРєРѕСЂРѕСЃС‚Рё
 #define SPEED_1 5
 #define DIR_1 4
 
 #define SPEED_2 6
 #define DIR_2 7
 
-//Сервоприводы двигаются с разной скоростью. Коэф это исправляет
+//РЎРµСЂРІРѕРїСЂРёРІРѕРґС‹ РґРІРёРіР°СЋС‚СЃСЏ СЃ СЂР°Р·РЅРѕР№ СЃРєРѕСЂРѕСЃС‚СЊСЋ. РљРѕСЌС„ СЌС‚Рѕ РёСЃРїСЂР°РІР»СЏРµС‚
 #define COEFF_RIGHT 0.87
 #define COEFF_LEFT 1
 
-// Возможные направления движения робота
+// Р’РѕР·РјРѕР¶РЅС‹Рµ РЅР°РїСЂР°РІР»РµРЅРёСЏ РґРІРёР¶РµРЅРёСЏ СЂРѕР±РѕС‚Р°
 #define FORWARD 1
 #define BACKWARD 2
 #define LEFT 3
@@ -44,7 +44,7 @@ using json = nlohmann::json;
 
 std::vector<std::string> cmd = {"nothing", "forward", "backward", "left", "right"};
 
-//прерывание по Ctrl+c
+//РїСЂРµСЂС‹РІР°РЅРёРµ РїРѕ Ctrl+c
 int running = 1;
 void sig_handler(int signo)
 {
@@ -54,11 +54,11 @@ void sig_handler(int signo)
     }
 }
 
-//класс отвечает за общение с сервером.
+//РєР»Р°СЃСЃ РѕС‚РІРµС‡Р°РµС‚ Р·Р° РѕР±С‰РµРЅРёРµ СЃ СЃРµСЂРІРµСЂРѕРј.
 class RobotNetwork
 {
 private:
-	//коллбэк для curl
+	//РєРѕР»Р»Р±СЌРє РґР»СЏ curl
 	static std::size_t callback(
             const char* in,
             std::size_t size,
@@ -71,7 +71,7 @@ private:
     }
 	
 public:
-	//костыль 1: забрать json с html страницы ThingWorx
+	//РєРѕСЃС‚С‹Р»СЊ 1: Р·Р°Р±СЂР°С‚СЊ json СЃ html СЃС‚СЂР°РЅРёС†С‹ ThingWorx
 	static std::string parseJsonFromHtml(std::string str)
     {
         std::string res = "";
@@ -95,7 +95,7 @@ public:
         return res;
     }
 	
-	//костыль 2: проблема с кодировской спец символов
+	//РєРѕСЃС‚С‹Р»СЊ 2: РїСЂРѕР±Р»РµРјР° СЃ РєРѕРґРёСЂРѕРІСЃРєРѕР№ СЃРїРµС† СЃРёРјРІРѕР»РѕРІ
 	static void fixString(std::string &str)
 	{
 		size_t f = -1;
@@ -118,7 +118,7 @@ public:
 		}
 	}
 	
-	//коннект к ThingWorx
+	//РєРѕРЅРЅРµРєС‚ Рє ThingWorx
 	int connect(std::string params)
 	{
 		const std::string url(DEFAULT_URL + params);
@@ -154,7 +154,7 @@ public:
 		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
 		curl_easy_cleanup(curl);
 
-		//если соединение успешно:
+		//РµСЃР»Рё СЃРѕРµРґРёРЅРµРЅРёРµ СѓСЃРїРµС€РЅРѕ:
 		if (httpCode == 200)
 		{
 			std::cout << "\nGot successful response from " << url << std::endl;
@@ -166,7 +166,7 @@ public:
 			json j = json::parse(jsonData);
 			std::string command = j.value("comand", "nothing");
 			std::cout << command << std::endl;
-			//возвращает команду по номеру. TODO переделать вектор в enum?
+			//РІРѕР·РІСЂР°С‰Р°РµС‚ РєРѕРјР°РЅРґСѓ РїРѕ РЅРѕРјРµСЂСѓ. TODO РїРµСЂРµРґРµР»Р°С‚СЊ РІРµРєС‚РѕСЂ РІ enum?
 			for(int i = 0; i < cmd.size(); ++i)
 			{
 				if (command.compare(cmd[i]) == 0)
@@ -195,7 +195,7 @@ public:
 
 };
 
-//класс отвечает за движение
+//РєР»Р°СЃСЃ РѕС‚РІРµС‡Р°РµС‚ Р·Р° РґРІРёР¶РµРЅРёРµ
 class RobotDriver
 {
 private:
@@ -210,7 +210,7 @@ public:
         dir1.dir(DIR_OUT);
         dir2.dir(DIR_OUT);
     }
-	//если подать на spd1,2 0, то колеса застревают в движении. особеность edison.
+	//РµСЃР»Рё РїРѕРґР°С‚СЊ РЅР° spd1,2 0, С‚Рѕ РєРѕР»РµСЃР° Р·Р°СЃС‚СЂРµРІР°СЋС‚ РІ РґРІРёР¶РµРЅРёРё. РѕСЃРѕР±РµРЅРѕСЃС‚СЊ edison.
 	void stop()
 	{
 		usleep(100000);
@@ -225,7 +225,7 @@ public:
 		usleep(500000);
 	}
 	
-	//движение в определенную сторону с указанной скоростью.
+	//РґРІРёР¶РµРЅРёРµ РІ РѕРїСЂРµРґРµР»РµРЅРЅСѓСЋ СЃС‚РѕСЂРѕРЅСѓ СЃ СѓРєР°Р·Р°РЅРЅРѕР№ СЃРєРѕСЂРѕСЃС‚СЊСЋ.
     void go(int newDirection, float speed)
     {
       bool motorDirection_1, motorDirection_2;
@@ -254,11 +254,11 @@ public:
             break;
       }
 
-      // Если мы ошиблись с подключением - меняем направление на обратное
+      // Р•СЃР»Рё РјС‹ РѕС€РёР±Р»РёСЃСЊ СЃ РїРѕРґРєР»СЋС‡РµРЅРёРµРј - РјРµРЅСЏРµРј РЅР°РїСЂР°РІР»РµРЅРёРµ РЅР° РѕР±СЂР°С‚РЅРѕРµ
       motorDirection_1 = CON_MOTOR1 ^ motorDirection_1;
       motorDirection_2 = CON_MOTOR2 ^ motorDirection_2;
 
-      // Скорость может меняться в пределах от 0 до 1.
+      // РЎРєРѕСЂРѕСЃС‚СЊ РјРѕР¶РµС‚ РјРµРЅСЏС‚СЊСЃСЏ РІ РїСЂРµРґРµР»Р°С… РѕС‚ 0 РґРѕ 1.
 	  if(speed > 0.0)
 	  {
 		  spd1.write(speedR);
@@ -275,7 +275,7 @@ public:
       dir2.write(motorDirection_2);
     }
 	
-	//один шаг (или поворот) в указанном направлении
+	//РѕРґРёРЅ С€Р°Рі (РёР»Рё РїРѕРІРѕСЂРѕС‚) РІ СѓРєР°Р·Р°РЅРЅРѕРј РЅР°РїСЂР°РІР»РµРЅРёРё
 	void step(int direction)
 	{
 		switch ( direction ) {
@@ -319,27 +319,27 @@ int main()
     RobotDriver robotDriver;
     RobotNetwork robotNetwork;
 	
-    // Задержка 3 секунд после включения питания
+    // Р—Р°РґРµСЂР¶РєР° 3 СЃРµРєСѓРЅРґ РїРѕСЃР»Рµ РІРєР»СЋС‡РµРЅРёСЏ РїРёС‚Р°РЅРёСЏ
 	usleep(3000000);
 	std::cout << "start!" << std::endl;
 	
 	int lastCommand = NOTHING;
 
-	//цикл прерывается по ctrl+c
+	//С†РёРєР» РїСЂРµСЂС‹РІР°РµС‚СЃСЏ РїРѕ ctrl+c
 	while(running)
 	{
-		//список посылаемых параметров
+		//СЃРїРёСЃРѕРє РїРѕСЃС‹Р»Р°РµРјС‹С… РїР°СЂР°РјРµС‚СЂРѕРІ
 		std::string params("&state=\"ready!_last_cmd=" + cmd[lastCommand]+ "\"");
 		
-		//в answer - FORWARD, LEFT, RIGHT, BACKWARD или NOTHING; также -2 при ошибки подкл.
+		//РІ answer - FORWARD, LEFT, RIGHT, BACKWARD РёР»Рё NOTHING; С‚Р°РєР¶Рµ -2 РїСЂРё РѕС€РёР±РєРё РїРѕРґРєР».
 		int answer = robotNetwork.connect(params);
 		robotDriver.step(answer);
 		if (answer != NOTHING)
 			lastCommand = answer;
 	}
 	
-	//Дебаг:
-    // Медленный разгон до максимальной скорсти
+	//Р”РµР±Р°Рі:
+    // РњРµРґР»РµРЅРЅС‹Р№ СЂР°Р·РіРѕРЅ РґРѕ РјР°РєСЃРёРјР°Р»СЊРЅРѕР№ СЃРєРѕСЂСЃС‚Рё
 	/*std::cout << "accel!" << std::endl;
     for (int i=50; i<=1000; i+=50)
     {
